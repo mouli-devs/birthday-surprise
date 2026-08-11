@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise for Princy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ultra&family=Sacramento&family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --white: #FFFFFF;
+            --grid-line: #E8E8E8;
+            --crimson-blob: #8B1A35;
+            --maroon-text: #7A1A1A;
+            --script-brown: #2C1810;
+            --mauve-btn: #9B4A5C;
+            --dark-rose-bg: #8B1535;
+            --bubble-pink: #E8A0B4;
+            --pale-pink: #F0C0CC;
+            --gift-pink: #D4828E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #FFFFFF; 
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            perspective: 1500px;
+        }
+
+        /* 3D Page Transition System */
+        .page {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease, visibility 1s ease;
+            pointer-events: none;
+            z-index: 1;
+            backface-visibility: hidden;
+            transform-origin: center center;
+        }
+
+        /* Distinct 3D transitions for each page (when hidden) */
+        #page-1:not(.active) { transform: scale(0.5) rotateY(90deg) translateZ(-500px); }
+        #page-2:not(.active) { transform: rotateX(90deg) translateY(100%); }
+        #page-3:not(.active) { transform: rotateY(-90deg) translateX(-100%); }
+        #page-4:not(.active) { transform: scale(0.2) rotateZ(180deg); }
+        #page-5:not(.active) { transform: rotateX(-90deg) translateY(-100%); }
+        #page-6:not(.active) { transform: rotateY(90deg) translateX(100%); }
+        #page-7:not(.active) { transform: rotateY(-90deg) translateZ(-1000px); }
+
+        /* When active, reset all transforms cleanly */
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) translate3d(0,0,0);
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .white-page {
+            background-color: var(--white);
+            background-image:
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        .blob-left {
+            position: absolute;
+            top: 30%;
+            left: -60px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .blob-bottom-right {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Typography & Buttons */
+        .ultra-font { font-family: 'Ultra', serif; }
+        .sacramento-font { font-family: 'Sacramento', cursive; }
+        .fredoka-font { font-family: 'Fredoka One', cursive; }
+
+        .btn {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: underline;
+            transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
+            border: none;
+            position: relative;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* Floating Animation for Illustrations */
+        .illustration-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .shake-anim { animation: shake 2s ease-in-out infinite; }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* PAGE 1 Specifics */
+        #page-1 .content { margin-left: 8vw; margin-top: -30px; align-items: flex-start; }
+        #page-1 .cat-container { position: absolute; top: 18%; right: 8vw; z-index: 2; width: 220px; height: 220px; }
+
+        /* PAGE 4 Specifics */
+        #page-4 .next-btn { position: absolute; bottom: 60px; right: 80px; z-index: 20; }
+
+        /* PAGE 5 - Envelope */
+        .envelope-wrapper { width: 360px; height: 260px; position: relative; margin-bottom: 20px; cursor: pointer; }
+        .env-back { position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #e6b6c2 0%, #d49a9f 100%); border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .env-body { position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #f0c0cc 0%, #e8a0b4 100%); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .env-flap { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 180px solid transparent; border-right: 180px solid transparent; border-top: 130px solid #d4828e; transform-origin: top; z-index: 10; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.1)); }
+        .ribbon-h { position: absolute; width: 100%; height: 30px; background: linear-gradient(to bottom, #8B1A35, #6b0e22); top: 50%; transform: translateY(-50%); z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .bow-3d { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.3)); }
+
+        /* PAGE 6 Specifics - Full Screen Readable Letter */
+        #page-6 .content {
+            width: 100vw;
+            height: 100vh;
+            padding: 40px;
+        }
+        .full-screen-letter {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            max-height: 85vh;
+            background: #fffdf5;
+            border: 1px solid #e8e0d0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .full-screen-letter h2 {
+            font-family: 'Sacramento', cursive;
+            font-size: 48px;
+            color: #8B1A35;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .full-screen-letter p {
+            font-family: 'Nunito', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        .full-screen-letter::-webkit-scrollbar { width: 6px; }
+        .full-screen-letter::-webkit-scrollbar-thumb { background: #8B1A35; border-radius: 3px; }
+        .full-screen-letter::-webkit-scrollbar-track { background: #f0f0f0; }
+
+        /* PAGE 7 Specifics - Enhanced Rich Red Background */
+        #page-7 {
+            background-color: #6B1023; /* Deeper richer red */
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(231, 160, 180, 0.15) 0%, transparent 40%), /* Glow top left */
+                radial-gradient(circle at 85% 80%, rgba(107, 16, 35, 0.9) 0%, transparent 50%), /* Deep shadow bottom right */
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 50px);
+            position: relative;
+        }
+        
+        /* Floating Hearts for Page 7 */
+        .floating-heart {
+            position: absolute;
+            color: rgba(232, 160, 180, 0.4);
+            animation: floatUp 10s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        .hanging-string { position: absolute; top: 25%; left: 0; width: 100%; height: 20px; z-index: 2; }
+        .polaroid { background: white; padding: 8px 8px 36px 8px; box-shadow: 2px 4px 12px rgba(0,0,0,0.3); position: absolute; top: calc(25% - 20px); width: 176px; transition: transform 0.3s ease; z-index: 5; }
+        .polaroid:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 100; }
+        .polaroid .clip { width: 12px; height: 20px; background: #555; border-radius: 2px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); }
+        .polaroid .photo { width: 160px; height: 130px; object-fit: cover; background: #eee; }
+        #page-7 .cake-icon { position: absolute; left: 40px; top: 60%; z-index: 5; }
+        #page-7 .love-text-container { position: absolute; left: 50%; transform: translateX(-50%); top: 57%; white-space: nowrap; z-index: 5; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+
+        .absolute-btn { position: absolute; z-index: 3; }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden YouTube Audio Player for Dandelions by Ruth B -->
+    <iframe src="https://www.youtube.com/embed/Kx2R_B0kgmE?autoplay=1&loop=1&playlist=Kx2R_B0kgmE&controls=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="position: absolute; width: 1px; height: 1px; border: 0; top: -100px; left: -100px; opacity: 0;"></iframe>
+
+    <!-- PAGE 1 -->
+    <div id="page-1" class="page white-page active">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="cat-container illustration-float">
+            <!-- Detailed White Fluffy Cat SVG -->
+            <svg width="220" height="220" viewBox="0 0 220 220">
+                <defs>
+                    <radialGradient id="furGrad1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF" /><stop offset="100%" stop-color="#E8E8E8" /></radialGradient>
+                    <radialGradient id="eyeGrad1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#006400" /><stop offset="80%" stop-color="#000" /></radialGradient>
+                </defs>
+                <path d="M55,65 L30,15 L80,40 Z" fill="url(#furGrad1)" stroke="#DDD" stroke-width="1"/>
+                <path d="M165,65 L190,15 L140,40 Z" fill="url(#furGrad1)" stroke="#DDD" stroke-width="1"/>
+                <path d="M60,55 L45,35 L70,45 Z" fill="#FFB6C1" />
+                <path d="M160,55 L175,35 L150,45 Z" fill="#FFB6C1" />
+                <ellipse cx="110" cy="110" rx="75" ry="65" fill="url(#furGrad1)" stroke="#DDD" stroke-width="1"/>
+                <path d="M35,115 Q45,125 35,135 Q25,125 35,115" fill="#E8E8E8"/>
+                <path d="M185,115 Q175,125 185,135 Q195,125 185,115" fill="#E8E8E8"/>
+                <ellipse cx="85" cy="100" rx="15" ry="18" fill="#fff" />
+                <ellipse cx="85" cy="102" rx="12" ry="15" fill="url(#eyeGrad1)" />
+                <circle cx="88" cy="96" r="4" fill="#fff" />
+                <ellipse cx="135" cy="100" rx="15" ry="18" fill="#fff" />
+                <ellipse cx="135" cy="102" rx="12" ry="15" fill="url(#eyeGrad1)" />
+                <circle cx="138" cy="96" r="4" fill="#fff" />
+                <path d="M110,120 L105,125 L115,125 Z" fill="#FFB6C1" stroke="#E8A0B4" stroke-width="0.5"/>
+                <path d="M110,125 Q100,135 90,125" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M110,125 Q120,135 130,125" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="30" y1="115" x2="80" y2="120" stroke="#AAA" stroke-width="1" stroke-linecap="round"/>
+                <line x1="30" y1="125" x2="80" y2="128" stroke="#AAA" stroke-width="1" stroke-linecap="round"/>
+                <line x1="190" y1="115" x2="140" y2="120" stroke="#AAA" stroke-width="1" stroke-linecap="round"/>
+                <line x1="190" y1="125" x2="140" y2="128" stroke="#AAA" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+        </div>
+        
+        <div class="content">
+            <h1 class="ultra-font" style="font-size: 72px; color: #8B1A35; letter-spacing: 2px; margin-bottom: 8px;">HEY!!</h1>
+            <p class="sacramento-font" style="font-size: 34px; color: #2C1810; margin-bottom: 2px;">I made something for you</p>
+            <p class="sacramento-font" style="font-size: 34px; color: #2C1810; margin-bottom: 24px;">Do you want to see?</p>
+            <div style="display: flex; gap: 16px;">
+                <button class="btn ultra-font" style="font-size: 28px; width: 130px; height: 54px; border-radius: 50px; background: #FFFFFF; border: 3px solid #2C1810; color: #2C1810;" onclick="showPage('page-3')">Yes</button>
+                <button class="btn ultra-font" style="font-size: 28px; width: 130px; height: 54px; border-radius: 50px; background: #8B1A35; border: 3px solid #2C1810; color: #FFFFFF;" onclick="showPage('page-2')">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div id="page-2" class="page white-page">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="content">
+            <div class="illustration-float shake-anim" style="position: relative; margin-bottom: 20px;">
+                <!-- Detailed Grumpy Tabby Cat SVG -->
+                <svg width="220" height="200" viewBox="0 0 220 200">
+                    <defs>
+                        <linearGradient id="tabbyGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E6A85C" /><stop offset="100%" stop-color="#B5651D" /></linearGradient>
+                    </defs>
+                    <path d="M60,60 L40,20 L80,40 Z" fill="url(#tabbyGrad2)" stroke="#8B5A2B" stroke-width="1"/>
+                    <path d="M160,60 L180,20 L140,40 Z" fill="url(#tabbyGrad2)" stroke="#8B5A2B" stroke-width="1"/>
+                    <ellipse cx="110" cy="100" rx="65" ry="55" fill="url(#tabbyGrad2)" stroke="#8B5A2B" stroke-width="1"/>
+                    <path d="M110,45 L105,55 M110,45 L115,55 M90,50 L85,60 M130,50 L135,60 M70,80 L60,90 M150,80 L160,90 M60,110 L50,120 M160,110 L170,120 M110,130 L105,140 M110,130 L115,140" stroke="#8B5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M75,90 L90,95 L75,100 Z" fill="#000" />
+                    <path d="M145,90 L130,95 L145,100 Z" fill="#000" />
+                    <path d="M70,80 L90,90" stroke="#8B5A2B" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M150,80 L130,90" stroke="#8B5A2B" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M110,115 L100,120 L120,120 Z" fill="#FFB6C1" stroke="#8B1A35" stroke-width="0.5"/>
+                    <path d="M90,135 Q110,120 130,135" fill="none" stroke="#000" stroke-width="2" transform="rotate(180 110 130)"/>
+                    <g transform="translate(130, 25) scale(1.2)">
+                        <circle cx="0" cy="0" r="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+                        <ellipse cx="0" cy="-12" rx="7" ry="12" fill="#FFB6C1" stroke="#E8A0B4" stroke-width="1"/>
+                        <ellipse cx="0" cy="12" rx="7" ry="12" fill="#FFB6C1" stroke="#E8A0B4" stroke-width="1"/>
+                        <ellipse cx="-12" cy="0" rx="12" ry="7" fill="#FFB6C1" stroke="#E8A0B4" stroke-width="1"/>
+                        <ellipse cx="12" cy="0" rx="12" ry="7" fill="#FFB6C1" stroke="#E8A0B4" stroke-width="1"/>
+                    </g>
+                </svg>
+            </div>
+            <h1 class="ultra-font" style="font-size: 52px; color: #8B1A35; letter-spacing: 3px; text-align: center; margin-bottom: 24px;">HOW DARE YOU</h1>
+            <button class="btn sacramento-font" style="font-size: 32px; width: 160px; height: 54px; border-radius: 50px; background: #F5F0EE; border: 3px solid #2C1810; color: #2C1810;" onclick="showPage('page-1')">Go back</button>
+        </div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div id="page-3" class="page white-page">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="content">
+            <div class="illustration-float" style="position: relative; margin-bottom: 16px;">
+                <!-- Excited Cat with Detailed Bow and Paws -->
+                <svg width="220" height="200" viewBox="0 0 220 220">
+                    <defs>
+                        <radialGradient id="furGrad3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF" /><stop offset="100%" stop-color="#E8E8E8" /></radialGradient>
+                        <radialGradient id="eyeGrad3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#006400" /><stop offset="80%" stop-color="#000" /></radialGradient>
+                    </defs>
+                    <ellipse cx="50" cy="160" rx="18" ry="25" fill="url(#furGrad3)" stroke="#DDD" stroke-width="1" transform="rotate(-45 50 160)"/>
+                    <ellipse cx="170" cy="160" rx="18" ry="25" fill="url(#furGrad3)" stroke="#DDD" stroke-width="1" transform="rotate(45 170 160)"/>
+                    <path d="M55,65 L30,15 L80,40 Z" fill="url(#furGrad3)" stroke="#DDD" stroke-width="1"/>
+                    <path d="M165,65 L190,15 L140,40 Z" fill="url(#furGrad3)" stroke="#DDD" stroke-width="1"/>
+                    <ellipse cx="110" cy="110" rx="75" ry="65" fill="url(#furGrad3)" stroke="#DDD" stroke-width="1"/>
+                    <ellipse cx="85" cy="100" rx="15" ry="18" fill="#fff" />
+                    <ellipse cx="85" cy="102" rx="12" ry="15" fill="url(#eyeGrad3)" />
+                    <circle cx="88" cy="96" r="4" fill="#fff" />
+                    <ellipse cx="135" cy="100" rx="15" ry="18" fill="#fff" />
+                    <ellipse cx="135" cy="102" rx="12" ry="15" fill="url(#eyeGrad3)" />
+                    <circle cx="138" cy="96" r="4" fill="#fff" />
+                    <path d="M110,120 L105,125 L115,125 Z" fill="#FFB6C1" />
+                    <path d="M90,135 Q110,150 130,135" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+                    <g class="bow-3d" transform="translate(60, 40) scale(1.5)">
+                        <path d="M0,0 C-25,-20 -35,0 -10,10 Z" fill="#D4828E" stroke="#8B1A35" stroke-width="1"/>
+                        <path d="M0,0 C25,-20 35,0 10,10 Z" fill="#D4828E" stroke="#8B1A35" stroke-width="1"/>
+                        <path d="M0,0 C-25,20 -35,0 -10,-10 Z" fill="#D4828E" stroke="#8B1A35" stroke-width="1"/>
+                        <path d="M0,0 C25,20 35,0 10,-10 Z" fill="#D4828E" stroke="#8B1A35" stroke-width="1"/>
+                        <circle cx="0" cy="0" r="6" fill="#8B1A35" />
+                    </g>
+                    <path d="M180,30 L185,45 L200,50 L185,55 L180,70 L175,55 L160,50 L175,45 Z" fill="#FFD700" stroke="#FFA500" stroke-width="0.5"/>
+                    <path d="M40,80 L43,88 L50,90 L43,92 L40,100 L37,92 L30,90 L37,88 Z" fill="#FFD700" stroke="#FFA500" stroke-width="0.5"/>
+                </svg>
+            </div>
+            <p class="sacramento-font" style="font-size: 38px; color: #2C1810; text-align: center; margin-bottom: 20px;">That's a good Gurlll 💋</p>
+            <button class="btn ultra-font" style="font-size: 28px; width: 160px; height: 54px; border-radius: 50px; background: #9B4A5C; border: 3px solid #5C1A25; color: #FFFFFF;" onclick="showPage('page-4')">Click</button>
+        </div>
+    </div>
+
+    <!-- PAGE 4 -->
+    <div id="page-4" class="page white-page">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="content">
+            <div class="illustration-float" style="position: relative; margin-bottom: 16px;">
+                <!-- Highly Detailed Cat with Party Hat & Cake -->
+                <svg width="200" height="220" viewBox="0 0 200 220">
+                    <defs>
+                        <linearGradient id="tabbyGrad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A9A9A9" /><stop offset="100%" stop-color="#808080" /></linearGradient>
+                    </defs>
+                    <path d="M60,70 L40,30 L80,50 Z" fill="url(#tabbyGrad4)" stroke="#555" stroke-width="1"/>
+                    <path d="M140,70 L160,30 L120,50 Z" fill="url(#tabbyGrad4)" stroke="#555" stroke-width="1"/>
+                    <ellipse cx="100" cy="110" rx="65" ry="55" fill="url(#tabbyGrad4)" stroke="#555" stroke-width="1"/>
+                    <path d="M100,60 L95,70 M100,60 L105,70 M80,65 L75,75 M120,65 L125,75 M70,90 L60,100 M130,90 L140,100" stroke="#555" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="75" cy="95" rx="12" ry="15" fill="#fff" />
+                    <ellipse cx="75" cy="97" rx="9" ry="12" fill="#000" />
+                    <circle cx="78" cy="92" r="3" fill="#fff" />
+                    <ellipse cx="125" cy="95" rx="12" ry="15" fill="#fff" />
+                    <ellipse cx="125" cy="97" rx="9" ry="12" fill="#000" />
+                    <circle cx="128" cy="92" r="3" fill="#fff" />
+                    <path d="M100,115 L95,120 L105,120 Z" fill="#FFB6C1" stroke="#8B1A35" stroke-width="0.5"/>
+                    <path d="M85,130 Q100,140 100,130 M115,130 Q100,140 100,130" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+                    <polygon points="100,0 70,60 130,60" fill="#D4828E" stroke="#8B1A35" stroke-width="2"/>
+                    <polygon points="100,0 85,30 115,30" fill="#8B1A35"/>
+                    <circle cx="100" cy="0" r="6" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+                    <circle cx="90" cy="40" r="3" fill="#FFD700"/>
+                    <circle cx="110" cy="50" r="3" fill="#FFF"/>
+                    <rect x="70" y="160" width="60" height="40" fill="#F0C0CC" stroke="#8B1A35" stroke-width="2"/>
+                    <path d="M70,170 Q85,160 100,170 Q115,160 130,170" fill="#FFF" stroke="#8B1A35" stroke-width="1"/>
+                    <path d="M85,170 Q80,180 85,190 M105,170 Q100,180 105,190" fill="#FFF" stroke="#8B1A35" stroke-width="1"/>
+                    <rect x="95" y="140" width="10" height="20" fill="#FFD700"/>
+                    <path d="M100,135 C95,125 105,125 100,135" fill="#FF4500"/>
+                </svg>
+            </div>
+            <h1 class="ultra-font" style="font-size: 46px; color: #8B1A35; letter-spacing: 2px; text-align: center; margin-bottom: 8px;">HAPPY BIRTHDAY BBG ❤️</h1>
+            <p style="font-weight: 700; font-size: 16px; color: #2C1810; letter-spacing: 1px; text-align: center; margin-bottom: 4px;">YOU ARE MY FAVORITE NOTIFICATION 💜</p>
+            <p style="font-weight: 700; font-size: 16px; color: #2C1810; letter-spacing: 1px; text-align: center; margin-bottom: 28px;">STAY CUTE, STAY HAPPY, STAY MINE 🐾 ❤️</p>
+        </div>
+        
+        <button class="btn sacramento-font absolute-btn" style="bottom: 60px; right: 80px; font-size: 30px; width: 110px; height: 48px; border-radius: 50px; background: #C07080; border: 2px solid #5C1A25; color: #FFFFFF;" onclick="showPage('page-5')">Next</button>
+    </div>
+
+    <!-- PAGE 5 -->
+    <div id="page-5" class="page white-page">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="content" onclick="showPage('page-6')" style="cursor: pointer;">
+            <!-- Premium Envelope -->
+            <div class="envelope-wrapper illustration-float">
+                <div class="env-back"></div>
+                <div class="env-body">
+                    <div class="ribbon-h"></div>
+                    <svg class="bow-3d" width="80" height="50" viewBox="0 0 80 50">
+                        <path d="M40,25 C10,0 0,10 10,25 C0,40 10,50 40,25 Z" fill="#8B1A35" stroke="#5C1A25" stroke-width="1"/>
+                        <path d="M40,25 C70,0 80,10 70,25 C80,40 70,50 40,25 Z" fill="#8B1A35" stroke="#5C1A25" stroke-width="1"/>
+                        <path d="M10,25 C5,35 15,45 35,30" fill="none" stroke="#8B1A35" stroke-width="3" />
+                        <path d="M70,25 C75,35 65,45 45,30" fill="none" stroke="#8B1A35" stroke-width="3" />
+                        <rect x="35" y="20" width="10" height="15" fill="#5C1A25" />
+                    </svg>
+                </div>
+                <div class="env-flap"></div>
+            </div>
+            <p class="sacramento-font" style="font-size: 34px; color: #2C1810; text-decoration: underline; text-align: center;">Tap here to open</p>
+        </div>
+
+        <svg class="absolute-btn" style="bottom: 40px; right: 60px;" width="100" height="80" viewBox="0 0 100 80">
+            <circle cx="30" cy="40" r="5" fill="#FFD700" stroke="#AAA" stroke-width="1"/>
+            <ellipse cx="30" cy="25" rx="6" ry="12" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="30" cy="55" rx="6" ry="12" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="15" cy="40" rx="12" ry="6" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="45" cy="40" rx="12" ry="6" fill="white" stroke="#CCC" stroke-width="1"/>
+            <circle cx="75" cy="55" r="4" fill="#FFD700" stroke="#AAA" stroke-width="1"/>
+            <ellipse cx="75" cy="43" rx="5" ry="10" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="75" cy="67" rx="5" ry="10" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="63" cy="55" rx="10" ry="5" fill="white" stroke="#CCC" stroke-width="1"/>
+            <ellipse cx="87" cy="55" rx="10" ry="5" fill="white" stroke="#CCC" stroke-width="1"/>
+        </svg>
+    </div>
+
+    <!-- PAGE 6 - FULL SCREEN LETTER -->
+    <div id="page-6" class="page white-page">
+        <svg class="blob-left" viewBox="0 0 160 280" width="130" height="250"><path d="M80,10 C120,10 150,50 155,100 C160,150 145,200 110,240 C80,270 30,270 10,240 C-15,205 0,150 5,100 C10,50 40,10 80,10Z" fill="#8B1A35"/></svg>
+        <svg class="blob-bottom-right" viewBox="0 0 220 220" width="200" height="200"><path d="M220,220 C180,220 120,215 80,190 C40,165 10,130 0,90 C-10,50 20,10 60,0 L220,0 Z" fill="#8B1A35"/></svg>
+        
+        <div class="content">
+            <div class="full-screen-letter">
+                <h2>A Letter For You</h2>
+                <p>Happy birthday, Princy ❤️🥹</p>
+                <p>It's hard to believe how many years have already gone by since we became best friends! We literally grew up together and somehow managed to survive all the stupid fights, tears, laughs, conversations... and u somehow remained one of the people who were closest to me all these years.</p>
+                <p>When u moved to the USA, I thought that something would change for us since having u half the world away is barely a deal for someone like me 😭, but somehow mana bond lo em change raledu. We still manage to talk to each other every single day, send each other ridiculous reels, discuss every possible topic that comes to mind, argue about dumb things, and then come back like nothing happened 😂.</p>
+                <p>I think that's what I love the most about u, Princy.</p>
+                <p>Entha distance unna, enni years ayina, u eppudu same Princy lagaane untav. ❤️</p>
+                <p>Being the person who somehow grew up with me and saw me growing up, knowing me at almost every stage of my life — na childhood nunchi ippati varaku nannu chusina person uve. I honestly can't imagine a bigger honour than that.</p>
+                <p>Some people come into ur life and eventually become just a memory, while some people stay and become a part of ur story. Nuvvu na story lo oka important part ayipoyav, and I don't think that's something that can just disappear because of distance. 😊</p>
+                <p>Mana friendship lo naaku nachina biggest thing enti ante, manam entha maarina, mana madhya unna comfort matram maaraledu. We can talk about literally anything, be completely stupid together, argue over the smallest things, and then continue talking like nothing happened 😭😂.</p>
+                <p>I'm grateful for every single conversation, every stupid message, every inside joke, every random chat, ur laughter that somehow knew how to find its way to me when I needed it most, and even ur anger and annoyance that somehow made me feel awful 😭.</p>
+                <p>U kopam lo unna, happy ga unna, edustunna, navvutunna — life lo em jarugutunna, somehow natho share cheskune person u. And honestly, adi naaku chala special. ❤️</p>
+                <p>But no matter how far u are, I sincerely hope that u know there's always someone here who cares for u, supports u, listens to u no matter what and no matter how long the story is, who'll be happy to see u 😂, and who'll obviously keep bothering u with questions about ur travels.</p>
+                <p>U eppudu gurthupettuko — neeku em jarigina, entha dooram unna, ikkada nenu unna.</p>
+                <p>Ur friend, ur personal reel sender, ur travel-question machine, and unfortunately, someone who's never going to stop annoying u 😭😂❤️.</p>
+                <p>I hope ur New Year brings u all the possible happiness and wonderful things and maybe the 10th BOY kuda into ur world, Princy! 😭😂</p>
+                <p>I hope u do beautiful things, make beautiful plans, meet beautiful people, achieve beautiful goals! I hope u experience everything u dream of, have a fantastic time, be always happy and do all the things u like most in this world!</p>
+                <p>Nee life lo u korukunna prati okkati jaragali. U eppudu happy ga undali, peaceful ga undali, and ur face meeda aa smile eppudu undali. ❤️</p>
+                <p>And selfishly, aa beautiful moments anni nenu kuda choodali, vini enjoy cheyyali, and somehow vaatilo oka small part aina undali ani korukuntunna. ❤️</p>
+                <p>Happy birthday to my friend, Princy! 🫶🏻</p>
+                <p>Thank u for growing up with me and somehow managing to be my friend despite so many years we spent together 😭😂.</p>
+                <p>Mana childhood nunchi ippati varaku vachina ee journey gurinchi alochiste, chala memories gurthostayi. Konni navvinchevi, konni emotional chesevi, konni "manam asalu ila ela friends ayyamu ra?" ani anipinchevi 😂 — but every single one of them is special because u were a part of them.</p>
+                <p>Enni years ayina, entha distance vachina, life manalni ekkadiki teesukellina... okati matram nijam — manam okariki okaram strangers aipokudadhu. ❤️</p>
+                <p>Have fun at ur birthday, birthday girl! 🥳❤️<br>Enjoy ur day, eat something nice, make some memories, and nannu marchipokunda konchem na gurinchi kuda think cheyyi 😭😂.</p>
+                <p>And don't let this message deceive u because nuvvu ippatiki kuda anthe annoying ga unnav, em change avvaledu 😭😂❤️.</p>
+                <p>Happy birthday once again, Princy. ❤️<br>Chaala happy ga undu, always. 🫶🏻</p>
+            </div>
+        </div>
+
+        <div class="camera-btn absolute-btn" onclick="showPage('page-7')" style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--script-brown); bottom: 50px; right: 60px;">
+            <svg width="32" height="32" viewBox="0 0 32 32">
+                <rect x="2" y="8" width="28" height="20" rx="3" fill="#2C1810"/>
+                <rect x="10" y="4" width="12" height="6" rx="1" fill="#2C1810"/>
+                <circle cx="16" cy="18" r="6" fill="#FFF"/>
+                <circle cx="16" cy="18" r="4" fill="#8B1A35"/>
+            </svg>
+            <span style="text-decoration: underline;">Click here</span>
+        </div>
+    </div>
+
+    <!-- PAGE 7 (Final Page) -->
+    <div id="page-7" class="page">
+        <!-- Floating Hearts Background Elements -->
+        <span class="floating-heart" style="left: 5%; font-size: 24px; animation-duration: 8s; animation-delay: 0s;">❤</span>
+        <span class="floating-heart" style="left: 15%; font-size: 18px; animation-duration: 12s; animation-delay: 2s;">❤</span>
+        <span class="floating-heart" style="left: 25%; font-size: 32px; animation-duration: 10s; animation-delay: 1s;">❤</span>
+        <span class="floating-heart" style="left: 35%; font-size: 20px; animation-duration: 9s; animation-delay: 3s;">❤</span>
+        <span class="floating-heart" style="left: 45%; font-size: 28px; animation-duration: 11s; animation-delay: 0s;">❤</span>
+        <span class="floating-heart" style="left: 55%; font-size: 22px; animation-duration: 8s; animation-delay: 4s;">❤</span>
+        <span class="floating-heart" style="left: 65%; font-size: 34px; animation-duration: 13s; animation-delay: 1s;">❤</span>
+        <span class="floating-heart" style="left: 75%; font-size: 18px; animation-duration: 10s; animation-delay: 2s;">❤</span>
+        <span class="floating-heart" style="left: 85%; font-size: 26px; animation-duration: 9s; animation-delay: 5s;">❤</span>
+        <span class="floating-heart" style="left: 95%; font-size: 20px; animation-duration: 12s; animation-delay: 0s;">❤</span>
+        <span class="floating-heart" style="left: 10%; font-size: 30px; animation-duration: 14s; animation-delay: 3s;">❤</span>
+        <span class="floating-heart" style="left: 50%; font-size: 16px; animation-duration: 7s; animation-delay: 6s;">❤</span>
+        <span class="floating-heart" style="left: 90%; font-size: 28px; animation-duration: 11s; animation-delay: 2s;">❤</span>
+
+        <svg class="hanging-string" viewBox="0 0 1280 20" preserveAspectRatio="none">
+            <path d="M0,5 Q640,18 1280,5" stroke="#D4A0A0" stroke-width="2" fill="none"/>
+        </svg>
+
+        <!-- Polaroid 1 (Red Sari) -->
+        <div class="polaroid" style="left: 8vw; transform: rotate(-8deg);">
+            <div class="clip"></div>
+            <img class="photo" src="https://z-cdn-media.chatglm.cn/files/b1bb108a-0c7e-4eb5-822e-1322fb8c7f56.jpg?auth_key=1886373831-fd20d73321584601a44fa753f6d5f7df-0-da3d0445929566023a021ca1c0718def" alt="Memory 1">
+            <span class="heart-sticker">❤</span>
+        </div>
+
+        <!-- Polaroid 2 (Welcome Center) -->
+        <div class="polaroid" style="left: calc(50% - 220px); transform: rotate(-2deg);">
+            <div class="clip"></div>
+            <img class="photo" src="https://z-cdn-media.chatglm.cn/files/3526a160-b0a4-4094-9811-a75d3fa70ef1.jpg?auth_key=1886373831-7203ea4e268440afba8e777a3ef37a83-0-f5d56d9527d4e69e911805df11fe131b" alt="Memory 2">
+            <span class="heart-sticker" style="left: 50%; transform: translateX(-50%);">❤</span>
+        </div>
+
+        <!-- Polaroid 3 (Glass Deck) -->
+        <div class="polaroid" style="right: 18vw; transform: rotate(6deg);">
+            <div class="clip"></div>
+            <img class="photo" src="https://z-cdn-media.chatglm.cn/files/5c8aa503-bf57-4249-81f3-43fd4d001cab.jpg?auth_key=1886373831-0bc8424ecb72456baab56a3150e62d5f-0-8fd7655353804e590353ca62343c35a6" alt="Memory 3">
+            <span class="heart-sticker">❤</span>
+        </div>
+
+        <!-- Polaroid 4 (City Street) -->
+        <div class="polaroid" style="right: 2vw; top: 35%; transform: rotate(-4deg);">
+            <div class="clip"></div>
+            <img class="photo" src="https://z-cdn-media.chatglm.cn/files/1e4f4b02-1118-4446-a91e-11da955c8220.jpg?auth_key=1886373831-82eccda80a27430da384b716ce2fef18-0-f1b45086cd09112382264a32fb944ea5" alt="Memory 4">
+            <span class="heart-sticker">❤</span>
+        </div>
+
+        <svg class="cake-icon absolute-btn" style="left: 40px; top: 60%;" width="60" height="50" viewBox="0 0 60 50">
+            <rect x="5" y="25" width="50" height="20" fill="#fff"/>
+            <path d="M5,25 Q12,15 19,25 Q26,15 33,25 Q40,15 47,25 Q54,15 55,25" fill="#fff"/>
+            <rect x="28" y="10" width="4" height="15" fill="#fff"/>
+            <circle cx="30" cy="6" r="4" fill="#FFF"/>
+            <path d="M30,2 L31,5 L34,6 L31,7 L30,10 L29,7 L26,6 L29,5 Z" fill="#FFD700"/>
+        </svg>
+
+        <div class="love-text-container">
+            <h1 class="fredoka-font" style="font-size: 86px; color: #E8A0B4; letter-spacing: 4px; position: relative;">
+                I LOVE YOU
+                <span style="position: absolute; top: -30px; left: 50px; font-size: 18px; color: #E8A0B4;">♥</span>
+                <span style="position: absolute; top: -10px; left: 55%; font-size: 14px; color: #E8A0B4;">♥</span>
+                <span style="position: absolute; bottom: -5px; right: 0px; font-size: 22px; color: #E8A0B4;">♥</span>
+            </h1>
+        </div>
+
+        <p style="position: absolute; left: 50%; transform: translateX(-50%); top: calc(57% + 100px); font-family: 'Nunito', sans-serif; font-weight: 400; font-size: 18px; color: #F0C0CC; text-align: center; white-space: nowrap; z-index: 5; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);">
+            You don't know how much you mean to me
+        </p>
+    </div>
+
+    <script>
+        const pages = document.querySelectorAll('.page');
+
+        function showPage(pageId) {
+            pages.forEach(p => p.classList.remove('active'));
+            const activePage = document.getElementById(pageId);
+            if (activePage) {
+                activePage.classList.add('active');
+            }
+        }
+
+        // Run immediately to ensure the first page is visible
+        showPage('page-1');
+    </script>
+</body>
+</html>
